@@ -1,4 +1,4 @@
-Peek
+# Peek
 
 A small Library of Babel implementation. I built this to test out go channels and I just read the short story. Check out https://libraryofbabel.info/ for a more comprehensive application. 
 
