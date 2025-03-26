@@ -8,7 +8,6 @@ import (
 	"sync"
 )
 
-// Define the character set
 const charSet = `abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ012345678
 	9 ,.!?`
 const seed = 1
