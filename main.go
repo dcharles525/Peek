@@ -13,29 +13,33 @@ const charSet = `abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ012345678
 const seed = 1
 const bookLength = 32000
 
-func generateRandomString(wg *sync.WaitGroup, results chan<- string) {
+func generateRandomString(wg *sync.WaitGroup, books chan<- string) {
 	defer wg.Done()
 	b := make([]byte, bookLength)
 	for i := range b {
 		b[i] = charSet[rand.Intn(len(charSet))]
 	}
-	results <- string(b)
+	books <- string(b)
 }
 
 func seekBook(bookNumber int) string {
 	var wg sync.WaitGroup
-	results := make(chan string, 1)
+	books := make(chan string, bookNumber)
 
 	go func() {
 		wg.Wait()
-		close(results)
+		close(books)
 	}()
 
 	for i := 0; i < bookNumber; i++ {
 		wg.Add(1)
-		go generateRandomString(&wg, results)
+		go generateRandomString(&wg, books)
 	}
-	return <-results
+	var lastBook string
+	for book := range books {
+		lastBook = book
+	}
+	return lastBook
 }
 
 func main() {
