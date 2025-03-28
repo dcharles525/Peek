@@ -2,44 +2,43 @@ package main
 
 import (
 	"fmt"
+  "sort"
 	"math/rand"
 	"os"
-	"sort"
 	"strconv"
 	"sync"
 )
 
-const charSet = `abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ012345678
-	9 ,.!?`
+const charSet = `abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 ,.!?`
 const seed = 1
-const bookLength = 32 //32000
+const bookLength = 32000
 
-func generateRandomString(wg *sync.WaitGroup, i int, books chan<- map[int]string, r *rand.Rand) {
+func generateRandomString(wg *sync.WaitGroup, f int, books chan<- map[int]string) {
 	defer wg.Done()
-	b := make([]byte, bookLength)
-	for i := range b {
-		b[i] = charSet[r.Intn(len(charSet))]
+  randSeeded := rand.New(rand.NewSource(int64(f)))
+	b := make([]byte, bookLength + 100)
+  for i := 0; i < bookLength; i++ {
+		b[i] = charSet[randSeeded.Intn(len(charSet))]
 	}
 
 	book := make(map[int]string)
-	book[i] = string(b)
+	book[f] = string(b)
 	books <- book
 }
 
 func seekBook(bookNumber int) string {
 	var wg sync.WaitGroup
 	books := make(chan map[int]string, bookNumber)
-	r := rand.New(rand.NewSource(seed))
-
-	for i := 0; i < bookNumber; i++ {
-		wg.Add(1)
-		go generateRandomString(&wg, i, books, r)
-	}
 
 	go func() {
 		wg.Wait()
 		close(books)
 	}()
+
+	for i := 0; i < bookNumber; i++ {
+		wg.Add(1)
+		go generateRandomString(&wg, i, books)
+	}
 
 	finalResults := make(map[int]string)
 	for book := range books {
@@ -48,12 +47,11 @@ func seekBook(bookNumber int) string {
 		}
 	}
 
-	keys := make([]int, 0, len(finalResults))
+  keys := make([]int, 0, len(finalResults))
 	for k := range finalResults {
 		keys = append(keys, k)
 	}
-
-	sort.Ints(keys)
+  sort.Ints(keys)
 
 	return finalResults[keys[len(keys)-1]]
 }
