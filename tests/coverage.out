@@ -1,0 +1,10 @@
+mode: set
+peek/main.go:14.48,18.34 3 1
+peek/main.go:18.34,20.3 1 1
+peek/main.go:22.2,22.13 1 1
+peek/main.go:25.37,26.20 1 1
+peek/main.go:26.20,29.3 2 1
+peek/main.go:31.2,33.26 2 1
+peek/main.go:33.26,36.3 2 1
+peek/main.go:38.2,38.39 1 1
+peek/main.go:41.13,43.2 1 0

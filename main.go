@@ -5,51 +5,39 @@ import (
 	"math/rand"
 	"os"
 	"strconv"
-	"sync"
 )
 
-const charSet = `abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ012345678
-	9 ,.!?`
+const charSet = `abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 ,.!?`
 const seed = 1
 const bookLength = 32000
 
-func generateRandomString(wg *sync.WaitGroup, results chan<- string) {
-	defer wg.Done()
-	b := make([]byte, bookLength)
-	for i := range b {
-		b[i] = charSet[rand.Intn(len(charSet))]
+func generateRandomString(bookPage int) []byte {
+	randSeeded := rand.New(rand.NewSource(int64(bookPage)))
+	book := make([]byte, bookLength)
+
+	for i := 0; i < bookLength; i++ {
+		book[i] = charSet[randSeeded.Intn(len(charSet))]
 	}
-	results <- string(b)
+
+	return book
 }
 
-func seekBook(bookNumber int) string {
-	var wg sync.WaitGroup
-	results := make(chan string, 1)
-
-	go func() {
-		wg.Wait()
-		close(results)
-	}()
-
-	for i := 0; i < bookNumber; i++ {
-		wg.Add(1)
-		go generateRandomString(&wg, results)
-	}
-	return <-results
-}
-
-func main() {
-	if len(os.Args) != 2 {
+func seekBook(args []string) []byte {
+	if len(args) != 2 {
 		fmt.Println("Usage: go run main.go <book>")
-		return
+		return []byte{}
 	}
 
-	numBooks, numBooksError := strconv.Atoi(os.Args[1])
-	rand.Seed(seed)
+	numBooks, numBooksError := strconv.Atoi(args[1])
 
 	if numBooksError != nil {
 		fmt.Println("Usage: Enter a valid integer value for the book number")
+		return []byte{}
 	}
 
-	fmt.Println(seekBook(numBooks))
+	return generateRandomString(numBooks)
+}
+
+func main() {
+	fmt.Println(string(seekBook(os.Args)))
 }
